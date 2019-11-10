@@ -39,6 +39,9 @@ Sends email to client with verification link `http://domain.com/verify?token`
             }
 
 + Response 400 (application/json)
+
+    + Attributes (array[Validation Error])
+    
 + Response 409 (application/json)
 
 ## Login [/login]
@@ -62,6 +65,8 @@ Login client. Returns token.
             }
 
 + Response 400 (application/json)
+
+    + Attributes (array[Validation Error])
 
 + Response 401 (application/json)
 
@@ -103,6 +108,8 @@ Change client's status to `verified`.
 + Response 204 (application/json)
 + Response 400 (application/json)
 
+    + Attributes (array[Validation Error])
+
 ## Request password recovery [/request-password-recovery]
 
 ### Request password recovery [POST]
@@ -121,6 +128,8 @@ Token expires in 15 minutes.
 + Response 204 (application/json)
 + Response 400 (application/json)
 
+    + Attributes (array[Validation Error])
+
 ## Change password recovery [/change-password-recovery]
 
 ### Change password recovery [POST]
@@ -135,6 +144,9 @@ Changes password with token obtained during requesting password recovery.
 
 + Response 204 (application/json)
 + Response 400 (application/json)
+
+    + Attributes (array[Validation Error])
+
 + Response 404 (application/json)
 
 ## Parse [/parse]
@@ -163,6 +175,9 @@ Returns product info parsed from page by given URL.
             }
 
 + Response 400 (application/json)
+
+    + Attributes (array[Validation Error])
+
 + Response 401 (application/json)
 + Response 404 (application/json)
 + Response 423 (application/json)
@@ -232,6 +247,9 @@ Updates client's data.
 
 + Response 204 (application/json)
 + Response 400 (application/json)
+
+    + Attributes (array[Validation Error])
+
 + Response 401 (application/json)
 + Response 403 (application/json)
 + Response 404 (application/json)
@@ -253,6 +271,9 @@ Updates client's password.
 
 + Response 204 (application/json)
 + Response 400 (application/json)
+
+    + Attributes (array[Validation Error])
+
 + Response 401 (application/json)
 + Response 403 (application/json)
 
@@ -307,6 +328,9 @@ Only owner of the wish list can perform operation (client-id and user id from se
     + Attributes (Empty Wish List)
 
 + Response 400 (application/json)
+
+    + Attributes (array[Validation Error])
+
 + Response 401 (application/json)
 + Response 403 (application/json)
 + Response 409 (application/json)
@@ -329,6 +353,9 @@ Only owner of the wish list can perform operation (client-id and user id from se
 
 + Response 204 (application/json)
 + Response 400 (application/json)
+
+    + Attributes (array[Validation Error])
+
 + Response 401 (application/json)
 + Response 403 (application/json)
 + Response 404 (application/json)
@@ -373,6 +400,9 @@ Only owner of the wish list can perform operation (client-id and user id from se
     + Attributes (Item)
 
 + Response 400 (application/json)
+
+    + Attributes (array[Validation Error])
+
 + Response 401 (application/json)
 + Response 403 (application/json)
 + Response 409 (application/json)
@@ -396,6 +426,9 @@ Only owner of the wish list can perform operation (client-id and user id from se
 
 + Response 204 (application/json)
 + Response 400 (application/json)
+
+    + Attributes (array[Validation Error])
+
 + Response 401 (application/json)
 + Response 403 (application/json)
 + Response 404 (application/json)
@@ -454,6 +487,9 @@ Only owner of the dont want list can perform operation (client-id and user id fr
     + Attributes (Dont want)
 
 + Response 400 (application/json)
+
+    + Attributes (array[Validation Error])
+
 + Response 401 (application/json)
 + Response 403 (application/json)
 + Response 409 (application/json)
@@ -476,6 +512,9 @@ Only owner of the dont want list can perform operation (client-id and user id fr
 
 + Response 204 (application/json)
 + Response 400 (application/json)
+
+    + Attributes (array[Validation Error])
+
 + Response 401 (application/json)
 + Response 403 (application/json)
 
@@ -546,10 +585,8 @@ Only owner of the dont want list can perform operation (client-id and user id fr
 + comment: Too simple (string) - some additional info
 + thumbnail (string) - path to thumbnail
 
-## Validation Errors (array[Validation Error])
-
 ## Validation Error (object)
 
 + field_name (object)
-    + code (string)
-    + param (string)
+    + code: required (string)
+    + param: details (string)
