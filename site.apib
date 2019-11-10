@@ -1,0 +1,555 @@
+FORMAT: 1A
+HOST: https://dev.iwant.gift/api/v1
+
+# Wish List
+
+API server documentation.
+
+Current version: 1.0
+
+Protocol: JSON over HTTP
+
+Transport: HTTP
+
+Endpoint prefix: /api/v1
+
+Authorization: 1024 bit token with Bearer scheme inside the Authorization header.
+
+## Register [/register]
+
+### Register [POST]
+
+Creates new client with status `new`. Password will be hashed. Login immediately.
+
+Sends email to client with verification link `http://domain.com/verify?token`
+
++ Request (application/json)
+
+    + Attributes
+        + name: `Vasya Molochnik` (string, required)
+        + email: `email@example.com` (string, required)
+        + password: `1password` (string, required)
+
++ Response 201 (application/json)
+
+    + Body
+
+            {
+                "token": "token-1024-bit-length"
+            }
+
++ Response 400 (application/json)
++ Response 409 (application/json)
+
+## Login [/login]
+
+### Login [POST]
+
+Login client. Returns token.
+
++ Request (application/json)
+
+    + Attributes
+        + email: `email@example.com` (string, required)
+        + password: `1password` (string, required)
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "token": "token-1024-bit-length"
+            }
+
++ Response 400 (application/json)
+
++ Response 401 (application/json)
+
+    + Body
+
+            {
+                "Message": "Unauthorized" # Invalid credentials
+            }
+
+## Logout [/logout]
+
+### Logout [POST]
+
+**Auth required**
+
+Logout from current session.
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "Message": "OK" # Logged out
+            }
+
++ Response 401 (application/json)
+
+## Verify [/verify]
+
+### Verify [POST]
+
+Change client's status to `verified`.
+
++ Request (application/json)
+
+    + Attributes
+        + token: `verification-token-from-email` (string, required)
+
++ Response 204 (application/json)
++ Response 400 (application/json)
+
+## Request password recovery [/request-password-recovery]
+
+### Request password recovery [POST]
+
+Requests email with link to page where client can change his password.
+
+As a result client will receive e-mail with link `domain/password-recovery?token=hashedtoken`
+
+Token expires in 15 minutes.
+
++ Request (application/json)
+
+    + Attributes
+        + email: `email@example.com` (string, required)
+
++ Response 204 (application/json)
++ Response 400 (application/json)
+
+## Change password recovery [/change-password-recovery]
+
+### Change password recovery [POST]
+
+Changes password with token obtained during requesting password recovery.
+
++ Request (application/json)
+
+    + Attributes
+        + token: `recovery-token-from-email` (string, required)
+        + password: `new-password` (string, required)
+
++ Response 204 (application/json)
++ Response 400 (application/json)
++ Response 404 (application/json)
+
+## Parse [/parse]
+
+### Parse [POST]
+
+**Auth required**
+
+Returns product info parsed from page by given URL.
+
++ Request (application/json)
+
+    + Attributes
+        + url: `https://domain.com/link-to-the-desired-gift` (string, required) - URL to parse
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "currency": "USD"
+                "image": "http://cdn.shop.com/parsed-gitf-image.jpg"
+                "price": 2032.23
+                "title": "Parsed gift name"
+                "url": "https://domain.com/link-to-the-desired-gift-after-all-redirections"
+            }
+
++ Response 400 (application/json)
++ Response 401 (application/json)
++ Response 404 (application/json)
++ Response 423 (application/json)
+
+    + Body
+
+            {
+                "Message": "Locked" # F.e. captcha required
+            }
+
++ Response 502 (application/json)
+
+    + Body
+
+            {
+                "Message": "Bad Gateway" # Failed to make HTTP request
+            }
+
+## Profile [/profile]
+
+### Profile [GET]
+
+**Auth required**
+
+Returns currently logged in client info. 
+
++ Response 200 (application/json)
+
+    + Attributes (Safe Client)
+        + email: `email@domain.com` (string)
+
++ Response 400 (application/json)
++ Response 401 (application/json)
++ Response 404 (application/json)
+
+## Client [/client]
+
+### Get [GET /client/{id}]
+
+Returns public client information.
+
++ Parameters
+    + id: 1 (number, required) - id of the client
+
++ Response 200 (application/json)
+
+    + Attributes (Safe Client)
+
++ Response 400 (application/json)
++ Response 401 (application/json)
++ Response 404 (application/json)
+
+### Update [PUT /client/{id}]
+
+**Auth required**
+
+Updates client's data.
+
++ Parameters
+    + id: 1 (number, required) - id of the client
+
++ Request (application/json)
+
+    + Attributes
+        + name: Johan (string, required) - new name
+        + slug: `/johan-89` (string, required) - new slug
+
++ Response 204 (application/json)
++ Response 400 (application/json)
++ Response 401 (application/json)
++ Response 403 (application/json)
++ Response 404 (application/json)
+
+### Change Password [PUT /client/{id}/password]
+
+**Auth required**
+
+Updates client's password.
+
++ Parameters
+    + id: 1 (number, required) - id of the client
+
++ Request (application/json)
+
+    + Attributes
+        + old_password: `password1` (string, required) - current password
+        + new_password: `password11!` (string, required) - new password
+
++ Response 204 (application/json)
++ Response 400 (application/json)
++ Response 401 (application/json)
++ Response 403 (application/json)
+
+## Wish List [/client/{id}/wish-list]
+
+### Get All [GET]
+
+Returns wish list list.
+
++ Parameters
+    + id: 1 (number, required) - id of the client
+
++ Response 200 (application/json)
+
+    + Attributes
+        + lists (array[Item])
+
++ Response 400 (application/json)
+
+### Get One [GET /client/{id}/wish-list/{list_id}]
+
+Returns wish list and its items with specified ID.
+
++ Parameters
+    + id: 1 (number, required) - id of the client
+    + list_id: 231 (number, required) - id of the wish list
+
++ Response 200 (application/json)
+
+    + Attributes (Item)
+
++ Response 400 (application/json)
++ Response 404 (application/json)
+
+### Create [POST]
+
+**Auth required**
+
+Creates new wish list.
+
+Only owner of the wish list can perform operation (client-id and user id from session must be equal).
+
++ Parameters
+    + id: 1 (number, required) - id of the client
+
++ Request (application/json)
+
+    + Attributes (New Wish List)
+
++ Response 201 (application/json)
+
+    + Attributes (Empty Wish List)
+
++ Response 400 (application/json)
++ Response 401 (application/json)
++ Response 403 (application/json)
++ Response 409 (application/json)
+
+### Update [PUT /client/{id}/wish-list/{list_id}]
+
+**Auth required**
+
+Updates the wish list.
+
+Only owner of the wish list can perform operation (client-id and user id from session must be equal).
+
++ Parameters
+    + id: 1 (number, required) - id of the client
+    + list_id: 3213 (number, required) - id of the wish list
+
++ Request (application/json)
+
+    + Attributes (New Wish List)
+
++ Response 204 (application/json)
++ Response 400 (application/json)
++ Response 401 (application/json)
++ Response 403 (application/json)
++ Response 404 (application/json)
+
+### Delete [DELETE /client/{id}/wish-list/{list_id}]
+
+**Auth required**
+
+Deletes wish list.
+
+Only owner of the wish list can perform operation (client-id and user id from session must be equal).
+
++ Parameters
+    + id: 1 (number, required) - id of the client
+    + list_id: 3213 (number, required) - id of the wish list
+
++ Response 204 (application/json)
++ Response 400 (application/json)
++ Response 401 (application/json)
++ Response 403 (application/json)
+
+## Wish List Item [/client/{id}/wish-list/{list_id}/item]
+
+### Create [POST]
+
+**Auth required**
+
+Creates new wish list item.
+
+Only owner of the wish list can perform operation (client-id and user id from session must be equal).
+
++ Parameters
+    + id: 1 (number, required) - id of the client
+    + list_id: 3213 (number, required) - id of the wish list
+
++ Request (application/json)
+
+    + Attributes (New Item)
+
++ Response 201 (application/json)
+
+    + Attributes (Item)
+
++ Response 400 (application/json)
++ Response 401 (application/json)
++ Response 403 (application/json)
++ Response 409 (application/json)
+
+### Update [PUT /client/{id}/wish-list/{list_id}/item/{item_id}]
+
+**Auth required**
+
+Updates the wish list item.
+
+Only owner of the wish list can perform operation (client-id and user id from session must be equal).
+
++ Parameters
+    + id: 1 (number, required) - id of the client
+    + list_id: 3213 (number, required) - id of the wish list
+    + item_id: 4321 (number, required) - id of the wish list item
+
++ Request (application/json)
+
+    + Attributes (New Item)
+
++ Response 204 (application/json)
++ Response 400 (application/json)
++ Response 401 (application/json)
++ Response 403 (application/json)
++ Response 404 (application/json)
+
+### Delete [DELETE /client/{id}/wish-list/{list_id}/item/{item_id}]
+
+**Auth required**
+
+Deletes specified wish list item.
+
+Only owner of the wish list can perform operation (client-id and user id from session must be equal).
+
++ Parameters
+    + id: 1 (number, required) - id of the client
+    + list_id: 3213 (number, required) - id of the wish list
+    + item_id: 4321 (number, required) - id of the wish list item
+
++ Response 204 (application/json)
++ Response 400 (application/json)
++ Response 401 (application/json)
++ Response 403 (application/json)
++ Response 404 (application/json)
+
+## Don't Want [/client/{id}/dont-want]
+
+### Get List [GET]
+
+Returns dont want list.
+
++ Parameters
+    + id: 1 (number, required) - id of the client
+
++ Response 200 (application/json)
+
+    + Attributes (array[Dont want])
+
++ Response 400 (application/json)
+
+### Create [POST]
+
+**Auth required**
+
+Creates new dont want item.
+
+Only owner of the dont want list can perform operation (client-id and user id from session must be equal).
+
++ Parameters
+    + id: 1 (number, required) - id of the client
+
++ Request (application/json)
+
+    + Attributes (New Dont Want)
+
++ Response 201 (application/json)
+
+    + Attributes (Dont want)
+
++ Response 400 (application/json)
++ Response 401 (application/json)
++ Response 403 (application/json)
++ Response 409 (application/json)
+
+### Update [PUT /client/{id}/dont-want/{item_id}]
+
+**Auth required**
+
+Updates the dont want item.
+
+Only owner of the dont want list can perform operation (client-id and user id from session must be equal).
+
++ Parameters
+    + id: 1 (number, required) - id of the client
+    + item_id: 3123 (number, required) - id of the don't want item
+
++ Request (application/json)
+
+    + Attributes (New Dont Want)
+
++ Response 204 (application/json)
++ Response 400 (application/json)
++ Response 401 (application/json)
++ Response 403 (application/json)
+
+### Delete [DELETE /client/{id}/dont-want/{item_id}]
+
+**Auth required**
+
+Deletes specified dont want item.
+
+Only owner of the dont want list can perform operation (client-id and user id from session must be equal).
+
++ Parameters
+    + id: 1 (number, required) - id of the client
+    + item_id: 3123 (number, required) - id of the don't want item
+
++ Response 204 (application/json)
++ Response 400 (application/json)
++ Response 401 (application/json)
++ Response 403 (application/json)
+
+# Data structures
+
+## Safe Client (object)
+
++ id: 1231 (number) - client ID
++ name: John (string) - client name
++ status: new (string) - client status
++ lists (array[Wish List], fixed) - wish lists
+
+## Wish List (Empty Wish List)
+
++ items (array[Item], fixed) - list of wish list items
+
+## Empty Wish List (New Wish List)
+
++ id: 3311 (number) - wish list incremental ID
+
+## New Wish List
+
++ name: My Birthday (string, required) - name of the wish list
++ comment: Additional info (string) - some additional info
++ thumbnail: https://cdn.example.com/image.png (string) - thumbnail URL
++ target_date: 2006-01-02T15:04:05Z07:00 (string) - target date of the wish list (birthday etc) in RFC3339
++ is_private: false (boolean) - whether it's public or private wish list
+
+## Item (New Item)
+
++ id: 53211 (number) - wish list item incremental ID
++ reserved_by_client_id (number) - ID of the client that have reserved this item
++ is_bought (boolean) - describes whether the item is bought or not
+
+## New Item (object)
+
++ name: Headphones (string) -  name of the item
++ comment: Airpods for example (string) - some additional notes
++ thumbnail: https://cdn.example.com/airpods.png (string) - path to the thumbnail
++ url: https://amazon.com/search/airpods (string) - URL to the item on external service
++ price: 200 (number) - cost of the item
++ currency: USD (string) - currency of the item
+
+## Dont want (New Dont Want)
+
++ id: 231 (number) - dont want item number
+
+## New Dont Want (object)
+
++ name: Money (string) - name of the dont want item
++ comment: Too simple (string) - some additional info
++ thumbnail (string) - path to thumbnail
+
+## Validation Errors (array[Validation Error])
+
+## Validation Error (object)
+
++ field_name (object)
+    + code (string)
+    + param (string)
